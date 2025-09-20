@@ -33,7 +33,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dbt
-        run: pip install dbt-databricks
+        run: pip install dbt-core dbt-databricks
 
       - name: Create dbt profiles.yml
         run: |
