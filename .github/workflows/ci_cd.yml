@@ -1,63 +1,25 @@
 # .github/workflows/ci_cd.yml
 
-name: CI/CD Pipeline for dbt Transformations
+name: Network Connectivity Test for Databricks
 
 on:
   push:
     branches:
       - main
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
-  run-dbt-on-databricks:
+  test-databricks-connection:
     runs-on: ubuntu-latest
-    environment: prod
     
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
       DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
-      # Garante que o dbt não peça feedback
-      DBT_SEND_ANONYMOUS_USAGE_STATS: "false"
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-
-      - name: Install dbt
-        run: pip install dbt-core dbt-databricks
-
-      - name: Create dbt profiles.yml
+      - name: Test network connection to Databricks endpoint
+        # Usamos curl com -v (verbose) e --max-time para timeout
+        # O objetivo é ver se conseguimos estabelecer uma conexão TLS/SSL
+        # com o host do Databricks na porta 443.
         run: |
-          mkdir -p ~/.dbt
-          cat <<EOF > ~/.dbt/profiles.yml
-          dbt_project:
-            target: prd
-            outputs:
-              prd:
-                type: databricks
-                host: ${{ env.DATABRICKS_HOST }}
-                http_path: ${{ env.DATABRICKS_HTTP_PATH }}
-                catalog: ifood_case
-                schema: case
-                threads: 1
-                token: ${{ env.DATABRICKS_TOKEN }}
-                type: databricks
-          EOF
-
-      - name: Test dbt connection
-        run: dbt debug --project-dir dbt_project --debug
-
-      - name: Run dbt models
-        run: dbt run --project-dir dbt_project --no-version-check
-
-      - name: Run dbt tests
-        run: dbt test --project-dir dbt_project --no-version-check
+          echo "Tentando conectar a: ${{ env.DATABRICKS_HOST }}${{ env.DATABRICKS_HTTP_PATH }}"
+          curl -v --max-time 30 ${{ env.DATABRICKS_HOST }}${{ env.DATABRICKS_HTTP_PATH }}
