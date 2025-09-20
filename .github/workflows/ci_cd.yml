@@ -17,10 +17,8 @@ jobs:
     environment: prod
     
     env:
-      # dbt-databricks usará estas variáveis para se autenticar via OIDC
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
-      # Precisamos passar o http_path para o profiles.yml
       DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
 
     steps:
@@ -40,8 +38,15 @@ jobs:
           mkdir -p ~/.dbt
           echo "dbt_project:\n  target: prod\n  outputs:\n    prod:\n      type: spark\n      host: ${{ env.DATABRICKS_HOST }}\n      http_path: ${{ env.DATABRICKS_HTTP_PATH }}\n      schema: default\n      auth_type: oauth-m2m\n      client_id: ${{ env.DATABRICKS_CLIENT_ID }}" > ~/.dbt/profiles.yml
 
+      - name: DEBUG - List all files recursively
+        run: ls -R
+
       - name: Test dbt connection
-        run: dbt debug --project-dir dbt_project
+        run: |
+          cd dbt_project
+          dbt debug
 
       - name: Run dbt test model
-        run: dbt run --select hello_dbt --project-dir dbt_project
+        run: |
+          cd dbt_project
+          dbt run --select hello_dbt
