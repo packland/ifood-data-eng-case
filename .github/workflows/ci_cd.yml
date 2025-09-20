@@ -18,8 +18,8 @@ jobs:
     
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
       DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
+      DBT_DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       # Garante que o dbt não peça feedback
       DBT_SEND_ANONYMOUS_USAGE_STATS: "false"
 
@@ -51,6 +51,7 @@ jobs:
                 threads: 1
                 token: ${{ env.DATABRICKS_TOKEN }}
                 type: databricks
+                auth_type: token
           EOF
 
       - name: Test dbt connection
