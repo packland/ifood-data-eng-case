@@ -36,7 +36,18 @@ jobs:
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
-          echo "dbt_project:\n  target: prod\n  outputs:\n    prod:\n      type: spark\n      host: ${{ env.DATABRICKS_HOST }}\n      http_path: ${{ env.DATABRICKS_HTTP_PATH }}\n      schema: default\n      auth_type: oauth-m2m\n      client_id: ${{ env.DATABRICKS_CLIENT_ID }}" > ~/.dbt/profiles.yml
+          cat <<EOF > ~/.dbt/profiles.yml
+          dbt_project:
+            target: prod
+            outputs:
+              prod:
+                type: spark
+                host: ${{ env.DATABRICKS_HOST }}
+                http_path: ${{ env.DATABRICKS_HTTP_PATH }}
+                schema: default
+                auth_type: oauth-m2m
+                client_id: ${{ env.DATABRICKS_CLIENT_ID }}
+          EOF
 
       - name: DEBUG - List all files recursively
         run: ls -R
