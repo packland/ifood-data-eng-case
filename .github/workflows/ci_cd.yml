@@ -54,7 +54,7 @@ jobs:
           EOF
 
       - name: Test dbt connection
-        run: dbt debug --project-dir dbt_project --no-version-check
+        run: dbt debug --project-dir dbt_project --debug
 
       - name: Run dbt models
         run: dbt run --project-dir dbt_project --no-version-check
