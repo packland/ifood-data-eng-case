@@ -1,0 +1,33 @@
+# .github/workflows/ci_cd.yml
+
+name: CI/CD Pipeline for Databricks
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-databricks-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run Test Notebook on Databricks
+        uses: databricks/run-notebook@v0
+        with:
+          databricks-host: ${{ secrets.DATABRICKS_HOST }}
+          databricks-token: ${{ secrets.DATABRICKS_TOKEN }}
+          
+          # Caminho para o nosso notebook de teste
+          local-notebook-path: tests/hello_world.py
+
+          # Onde executar
+          existing-cluster-id: ${{ secrets.DATABRICKS_CLUSTER_ID }}
+
+          # Parâmetros para o job
+          git-commit: ${{ github.sha }}
+
+          # Controlar o tempo de execução
+          timeout-seconds: 300
