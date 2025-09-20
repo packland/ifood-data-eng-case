@@ -35,16 +35,6 @@ jobs:
       - name: Install dbt
         run: pip install dbt-core dbt-databricks
 
-      - name: Debug Secrets
-        run: |
-          if [ -z "${{ env.DBT_DATABRICKS_TOKEN }}" ]; then
-            echo "ERRO: O segredo DBT_DATABRICKS_TOKEN está VAZIO ou não foi definido."
-            exit 1
-          else
-            echo "SUCESSO: O segredo DBT_DATABRICKS_TOKEN foi recebido."
-            echo "Comprimento do token recebido: ${{ env.DBT_DATABRICKS_TOKEN && 'não-vazio' || 'vazio' }}"
-          fi
-
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
@@ -59,9 +49,8 @@ jobs:
                 catalog: ifood_case
                 schema: case
                 threads: 1
-                token: ${{ env.DATABRICKS_TOKEN }}
+                token: ${{ env.DBT_DATABRICKS_TOKEN }}
                 type: databricks
-                auth_type: token
           EOF
 
       - name: Test dbt connection
