@@ -41,7 +41,8 @@ jobs:
             target: prod
             outputs:
               prod:
-                type: spark
+                type: databricks
+                method: http
                 host: ${{ env.DATABRICKS_HOST }}
                 http_path: ${{ env.DATABRICKS_HTTP_PATH }}
                 schema: default
