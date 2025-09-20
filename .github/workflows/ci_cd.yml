@@ -20,6 +20,8 @@ jobs:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
       DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
+      # Garante que o dbt não peça feedback
+      DBT_SEND_ANONYMOUS_USAGE_STATS: "false"
 
     steps:
       - name: Checkout code
@@ -31,34 +33,32 @@ jobs:
           python-version: '3.9'
 
       - name: Install dbt
-        run: pip install dbt-core dbt-databricks
+        run: pip install dbt-databricks
 
       - name: Create dbt profiles.yml
         run: |
           mkdir -p ~/.dbt
           cat <<EOF > ~/.dbt/profiles.yml
           dbt_project:
-            target: prod
+            target: prd
             outputs:
-              prod:
+              prd:
                 type: databricks
-                method: http
                 host: ${{ env.DATABRICKS_HOST }}
                 http_path: ${{ env.DATABRICKS_HTTP_PATH }}
-                schema: default
+                catalog: ifood_case
+                schema: case
+                threads: 1
+                # A autenticação OIDC substitui o token
                 auth_type: oauth-m2m
                 client_id: ${{ env.DATABRICKS_CLIENT_ID }}
           EOF
 
-      - name: DEBUG - List all files recursively
-        run: ls -R
-
       - name: Test dbt connection
-        run: |
-          cd dbt_project
-          dbt debug
+        run: dbt debug --project-dir dbt_project --no-version-check
 
-      - name: Run dbt test model
-        run: |
-          cd dbt_project
-          dbt run --select hello_dbt
+      - name: Run dbt models
+        run: dbt run --project-dir dbt_project --no-version-check
+
+      - name: Run dbt tests
+        run: dbt test --project-dir dbt_project --no-version-check
