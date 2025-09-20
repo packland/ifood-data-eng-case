@@ -1,17 +1,11 @@
 # src/ingestion.py
 
+import urllib.request
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import lit
 
-def main():
-    """
-    Função principal para ingerir dados de táxis de NY para a camada Bronze.
-    
-    Este script faz o download dos dados de Jan a Mai de 2023, os une
-    e salva como uma tabela Delta na camada Bronze.
-    """
-    # 1. Inicializa a SparkSession com suporte para Delta Lake
-    spark = (
+def get_spark_session():
+    """Obtém ou cria uma SparkSession com suporte a Delta Lake."""
+    return (
         SparkSession.builder
         .appName("BronzeIngestionNYCTaxi")
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
@@ -19,40 +13,70 @@ def main():
         .getOrCreate()
     )
 
-    print("Spark Session iniciada com sucesso.")
+def download_file_to_dbfs(url, dbfs_path, spark):
+    """Baixa um arquivo de uma URL para um caminho no DBFS."""
+    # A API dbutils está disponível nativamente em notebooks Databricks
+    dbutils = spark.sparkContext._jvm.com.databricks.backend.common.util.DBUtils
+    
+    print(f"Baixando {url} para {dbfs_path}...")
+    try:
+        # Usa urllib para ler o conteúdo do arquivo
+        with urllib.request.urlopen(url) as response:
+            content = response.read()
+        
+        # Usa dbutils para escrever os bytes no DBFS
+        dbutils.fs.put(dbfs_path, content, True) # True para overwrite
+        print("Download para DBFS concluído.")
+        return True
+    except Exception as e:
+        print(f"Erro ao baixar {url}: {e}")
+        return False
 
-    # 2. Define as URLs dos arquivos Parquet de Jan a Mai de 2023
+def main():
+    """
+    Função principal para ingerir dados de táxis de NY para a camada Bronze.
+    Implementa o padrão: Baixar -> Armazenar (Staging) -> Ingerir -> Limpar.
+    """
+    spark = get_spark_session()
+
+    # 1. Configurações
     base_url = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_{year}-{month:02d}.parquet"
     year = 2023
     months = range(1, 6)
-    
-    urls = [base_url.format(year=year, month=month) for month in months]
-    
-    print("Lendo os seguintes arquivos:")
-    for url in urls:
-        print(f" - {url}")
-
-    # 3. Lê todos os arquivos Parquet em um único DataFrame
-    # O Spark é otimizado para ler múltiplos arquivos de uma vez.
-    df = spark.read.parquet(*urls)
-
-    print(f"Total de {df.count()} registros lidos.")
-
-    # 4. Salva o DataFrame como uma tabela Delta na camada Bronze
-    # Usamos o modo "overwrite" para garantir que a ingestão seja idempotente.
-    # Se o script for executado novamente, ele substituirá os dados existentes.
+    staging_dir = "/tmp/nyc_taxi_raw"
     table_name = "bronze_taxi_trips"
+
+    # Garante que o diretório de staging exista e esteja limpo
+    dbutils = spark.sparkContext._jvm.com.databricks.backend.common.util.DBUtils
+    dbutils.fs.mkdirs(staging_dir)
+    print(f"Diretório de staging '{staging_dir}' preparado.")
+
+    # 2. Loop de Download para o Staging no DBFS
+    for month in months:
+        file_url = base_url.format(year=year, month=month)
+        file_name = file_url.split("/")[-1]
+        dbfs_staging_path = f"{staging_dir}/{file_name}"
+        download_file_to_dbfs(file_url, dbfs_staging_path, spark)
+
+    # 3. Ingestão para a Camada Bronze a partir do DBFS
+    print(f"Lendo todos os arquivos Parquet de '{staging_dir}'...")
+    df = spark.read.parquet(staging_dir)
+
+    print(f"Total de {df.count()} registros lidos do staging.")
     
     print(f"Salvando dados na tabela Delta: {table_name}...")
-    
     (
         df.write
         .format("delta")
         .mode("overwrite")
         .saveAsTable(table_name)
     )
+    print(f"Tabela {table_name} salva com sucesso.")
 
-    print(f"Tabela {table_name} salva com sucesso no formato Delta.")
+    # 4. Limpeza do diretório de staging
+    print(f"Limpando diretório de staging '{staging_dir}'...")
+    dbutils.fs.rm(staging_dir, recurse=True)
+    print("Limpeza concluída.")
 
     # 5. Finaliza a sessão Spark
     spark.stop()
