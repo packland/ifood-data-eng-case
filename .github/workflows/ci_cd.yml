@@ -49,9 +49,7 @@ jobs:
                 catalog: ifood_case
                 schema: case
                 threads: 1
-                # A autenticação OIDC substitui o token
-                auth_type: oauth-m2m
-                client_id: ${{ env.DATABRICKS_CLIENT_ID }}
+                token: ${{ env.DBT_DATABRICKS_TOKEN }}
           EOF
 
       - name: Test dbt connection
