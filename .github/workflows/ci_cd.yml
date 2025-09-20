@@ -1,33 +1,47 @@
 # .github/workflows/ci_cd.yml
 
-name: CI/CD Pipeline for Databricks
+name: CI/CD Pipeline for dbt Transformations
 
 on:
   push:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  run-databricks-test:
+  run-dbt-on-databricks:
     runs-on: ubuntu-latest
+    environment: prod
+    
+    env:
+      # dbt-databricks usará estas variáveis para se autenticar via OIDC
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
+      # Precisamos passar o http_path para o profiles.yml
+      DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Run Test Notebook on Databricks
-        uses: databricks/run-notebook@v0
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          databricks-host: ${{ secrets.DATABRICKS_HOST }}
-          databricks-token: ${{ secrets.DATABRICKS_TOKEN }}
-          
-          # Caminho para o nosso notebook de teste
-          local-notebook-path: tests/hello_world.py
+          python-version: '3.9'
 
-          # Onde executar
-          existing-cluster-id: ${{ secrets.DATABRICKS_CLUSTER_ID }}
+      - name: Install dbt
+        run: pip install dbt-databricks
 
-          # Parâmetros para o job
-          git-commit: ${{ github.sha }}
+      - name: Create dbt profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          echo "dbt_project:\n  target: prod\n  outputs:\n    prod:\n      type: spark\n      host: ${{ env.DATABRICKS_HOST }}\n      http_path: ${{ env.DATABRICKS_HTTP_PATH }}\n      schema: default\n      auth_type: oauth-m2m\n      client_id: ${{ env.DATABRICKS_CLIENT_ID }}" > ~/.dbt/profiles.yml
 
-          # Controlar o tempo de execução
-          timeout-seconds: 300
+      - name: Test dbt connection
+        run: dbt debug --project-dir dbt_project
+
+      - name: Run dbt test model
+        run: dbt run --select hello_dbt --project-dir dbt_project
