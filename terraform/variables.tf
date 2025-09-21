@@ -18,3 +18,9 @@ variable "spark_version" {
   # Nota: Sempre use uma versão LTS (Long Term Support) para maior estabilidade.
   default     = "14.3.x-scala2.12"
 }
+
+variable "catalog_name" {
+  type        = string
+  description = "O nome do catálogo principal para o projeto."
+  default     = "iac_catalog_ifood"
+}

@@ -1,0 +1,16 @@
+# Arquivo: terraform/outputs.tf
+
+output "cluster_url" {
+  description = "A URL para acessar a interface do cluster no Databricks."
+  value       = databricks_cluster.cluster_analise.url
+}
+
+output "cluster_id" {
+  description = "O ID do cluster criado."
+  value       = databricks_cluster.cluster_analise.id
+}
+
+output "catalog_name" {
+  description = "O nome do catálogo criado."
+  value       = databricks_catalog.catalog_padrao.name
+}
