@@ -9,8 +9,3 @@ output "cluster_id" {
   description = "O ID do cluster criado."
   value       = databricks_cluster.cluster_analise.id
 }
-
-output "catalog_name" {
-  description = "O nome do catálogo criado."
-  value       = databricks_catalog.catalog_padrao.name
-}
