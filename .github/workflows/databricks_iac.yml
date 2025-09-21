@@ -22,25 +22,14 @@ jobs:
       - name: 'Terraform Init'
         working-directory: ./terraform
         run: |
-          # 1. (NOVO) Cria o diretório de configuração do Terraform, caso não exista.
           mkdir -p ~/.terraform.d/
-          
-          # 2. Escreve o token de API no arquivo de credenciais.
           echo 'credentials "app.terraform.io" { token = "${{ secrets.TF_API_TOKEN }}" }' > ~/.terraform.d/credentials.tfrc.json
-          
-          # 3. Executa o init.
           terraform init
         
       - name: 'Terraform Plan'
         run: terraform plan -out=tfplan
         working-directory: ./terraform
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
       - name: 'Terraform Apply'
         run: terraform apply -auto-approve tfplan
         working-directory: ./terraform
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
