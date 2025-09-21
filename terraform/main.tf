@@ -13,7 +13,21 @@ resource "databricks_cluster" "cluster_analise" {
   spark_conf = {
     "spark.databricks.cluster.profile" = "singleNode"
   }
+# --- BIBLIOTECAS A SEREM INSTALADAS ---
+  # Adicionamos os pacotes dbt necessários via PyPI.
+  library {
+    pypi {
+      package = "dbt-core"
+    }
+  }
+
+  library {
+    pypi {
+      package = "dbt-databricks"
+    }
+  }
 }
+
 
 resource "databricks_catalog" "catalog_padrao" {
   name    = var.catalog_name
