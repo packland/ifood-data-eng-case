@@ -28,11 +28,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Databricks CLI
-        # Action oficial da Databricks para instalar e configurar a CLI 
-        uses: databricks/setup-cli@main
+      - name: Run Notebook on a New Job Cluster
+        uses: databricks/run-notebook@v0
+        with:
+          # A action usará as variáveis de ambiente DATABRICKS_HOST e DATABRICKS_CLIENT_ID para autenticação OIDC
+          
+          # O caminho para nosso notebook de teste
+          workspace-notebook-path: /Workspace/Users/packland@gmail.com/teste_conectividade_externa
 
-      - name: Run a simple command to test authentication
-        # Executamos um comando simples da CLI para listar o conteúdo da raiz do Workspace.
-        # Se este comando funcionar, a autenticação OIDC está 100% correta.
-        run: databricks workspace ls /
+          # A MÁGICA: Em vez de usar um cluster existente, definimos um novo cluster temporário.
+          # Este cluster será criado, executará o notebook e será terminado automaticamente.
+          new-cluster-json: >
+            {
+              "num_workers": 1,
+              "spark_version": "13.3.x-scala2.12",
+              "node_type_id": "Standard_DS3_v2"
+            }
