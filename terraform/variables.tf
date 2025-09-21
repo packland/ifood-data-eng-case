@@ -19,12 +19,6 @@ variable "spark_version" {
   default     = "14.3.x-scala2.12"
 }
 
-variable "catalog_name" {
-  type        = string
-  description = "O nome do catálogo principal para o projeto."
-  default     = "iac_catalog_ifood"
-}
-
 variable "DATABRICKS_HOST" {
   type        = string
   description = "A URL do workspace Databricks, fornecida pelo Terraform Cloud."
@@ -34,4 +28,10 @@ variable "DATABRICKS_TOKEN" {
   type        = string
   description = "O token de API do Databricks, fornecido pelo Terraform Cloud."
   sensitive   = true # Marca a variável como sensível para não exibi-la nos logs.
+}
+
+variable "schema_name" {
+  type        = string
+  description = "Nome do schema (banco de dados) a ser criado no Hive Metastore."
+  default     = "ifood_bronze"
 }
