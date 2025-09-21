@@ -9,7 +9,7 @@ variable "cluster_name" {
 variable "node_type" {
   type        = string
   description = "O tipo de máquina (VM) para os workers do cluster. Ex: Standard_DS3_v2."
-  default     = "Standard_D4ds_v5"
+  default     = "Standard_D4ds_v6"
 }
 
 variable "spark_version" {
