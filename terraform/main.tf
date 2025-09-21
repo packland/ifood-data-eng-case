@@ -28,7 +28,7 @@ resource "databricks_cluster" "cluster_analise" {
   }
 }
 
-
+/*
 resource "databricks_catalog" "catalog_padrao" {
   name    = var.catalog_name
   comment = "Catálogo principal criado via IaC para o projeto de análise."
@@ -36,4 +36,4 @@ resource "databricks_catalog" "catalog_padrao" {
   # Define que todos os usuários da conta são proprietários do catálogo.
   # Ajuste conforme as políticas de segurança da sua organização.
   owner   = "account users"
-}
+}*/

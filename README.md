@@ -1,69 +1,41 @@
 # ifood-data-eng-case
 Solução para o case técnico de engenharia de dados do iFood, utilizando PySpark, dbt e Delta Lake
 
-Instruções de implementação. 
+Projeto de IaC para Databricks com Terraform e GitHub Actions
+Este repositório contém a infraestrutura como código (IaC) para provisionar um ambiente de análise no Azure Databricks. O processo é 100% automatizado via GitHub Actions e o estado da infraestrutura é gerenciado de forma segura pelo Terraform Cloud.
+
+Configuração e Implementação
+Siga estes passos para configurar e executar o projeto pela primeira vez.
+
+Passo 1: Obter Credenciais do Databricks
+Para que o Terraform possa se comunicar com sua conta, ele precisa de um token de acesso.
 
 No seu workspace Databricks, clique no seu nome de usuário no canto superior direito e selecione "User Settings".
 
 Vá para a aba "Developer".
 
-Na seção "Access tokens", clique no botão "Manage".
+Na seção "Access tokens", clique no botão "Manage" e depois em "Generate new token".
 
-Clique em "Generate new token".
-
-Adicione um comentário descritivo, como Token para automação com Terraform/GitHub.
-
-Defina o tempo de vida (em dias). Para começar, pode deixar 90 dias. Se deixar em branco, o token não expira (conveniente para agora, mas menos seguro para produção).
+Adicione um comentário (ex: Token para IaC do GitHub) e defina um tempo de vida (ex: 90 dias).
 
 Clique em "Generate".
 
-ATENÇÃO: O Databricks mostrará o token apenas uma vez. Copie o token imediatamente e guarde-o em um local seguro. Você não poderá vê-lo novamente.
+Atenção: Copie o token gerado imediatamente e guarde-o em um local seguro. Você não poderá vê-lo novamente.
 
-Passo 2: Configurar os Secrets no Repositório GitHub
-Agora, vamos ao seu repositório no GitHub. Vá em Settings > Secrets and variables > Actions e crie os dois secrets a seguir. Se já os criou antes, apenas atualize os valores.
+Passo 2: Configurar o Terraform Cloud
+O Terraform Cloud irá armazenar o "estado" da nossa infraestrutura e executar os planos e aplicações.
 
-DATABRICKS_HOST
+Crie uma Conta Gratuita: Acesse app.terraform.io e crie uma conta (pode usar seu login do GitHub).
 
-Valor: A URL completa do seu workspace Databricks, começando com https://.
+Crie uma "Organization" e um "Workspace": Siga o setup inicial para criar uma organização (pode ser seu nome de usuário) e um novo workspace do tipo "CLI-driven workflow" (ex: databricks-iac-ifood).
 
-Exemplo: https://adb-1234567890123456.7.azuredatabricks.net
+Gere um Token de API do Terraform Cloud:
 
-DATABRICKS_TOKEN
+Dentro do Terraform Cloud, vá em "User Settings" > "Tokens".
 
-Valor: O token (PAT) que você acabou de gerar no passo anterior. Ele começará com dapi....
+Clique em "Create an API token", dê uma descrição e copie o token gerado.
 
-TERRAFORM
-
-Passo 2: Gere um Token de API
-Este token permitirá que o GitHub Actions se comunique com sua conta do Terraform Cloud de forma segura.
-
-Dentro do Terraform Cloud, clique no seu ícone de perfil no canto superior direito e vá para "User Settings".
-
-No menu à esquerda, clique em "Tokens".
-
-Clique em "Create an API token".
-
-Dê uma descrição (ex: GitHub Actions Token) e clique em "Create API token".
-
-Copie o token gerado! Ele não será mostrado novamente.
-
-Passo 3: Adicione o Token como um Segredo no GitHub
-Vá para o seu repositório no GitHub.
-
-Clique em "Settings" > "Secrets and variables" > "Actions".
-
-Clique em "New repository secret".
-
-No campo "Name", digite TF_API_TOKEN.
-
-No campo "Secret", cole o token que você copiou do Terraform Cloud.
-
-Clique em "Add secret".
-
-Passo 4: Configure o Backend no seu Código Terraform
-Crie um novo arquivo no seu projeto chamado terraform/backend.tf. Este arquivo dirá ao Terraform para usar o workspace que você criou.
-
-Arquivo: terraform/backend.tf
+Configure o Backend no Código: Crie o arquivo terraform/backend.tf com o conteúdo abaixo, substituindo os valores da sua organização e workspace:
 
 Terraform
 
@@ -71,13 +43,29 @@ Terraform
 
 terraform {
   cloud {
-    # Substitua pelo nome da organização que você criou
-    organization = "seu-nome-da-organizacao" 
-
+    organization = "seu-nome-da-organizacao"
     workspaces {
-      # Substitua pelo nome do workspace que você criou
       name = "databricks-iac-ifood"
     }
   }
 }
-Importante: Lembre-se de substituir seu-nome-da-organizacao pelo nome da sua organização no Terraform Cloud.
+Passo 3: Configurar as Variáveis no Terraform Cloud
+Agora, vamos informar ao Terraform Cloud quais são as credenciais do Databricks. É aqui que as variáveis são gravadas, e não mais no GitHub.
+
+Acesse seu workspace no Terraform Cloud.
+
+Vá para a aba "Variables".
+
+Na seção "Workspace Variables", adicione as duas variáveis a seguir:
+
+DATABRICKS_HOST
+
+Value: A URL completa do seu workspace Databricks (https://adb-....azuredatabricks.net).
+
+Deixe como "Terraform Variable" e NÃO marque como "Sensitive".
+
+DATABRICKS_TOKEN
+
+Value: O token do Databricks que você gerou no Passo 1.
+
+Deixe como "Terraform Variable" e MARQUE a opção "Sensitive".

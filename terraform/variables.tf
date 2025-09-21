@@ -24,3 +24,14 @@ variable "catalog_name" {
   description = "O nome do catálogo principal para o projeto."
   default     = "iac_catalog_ifood"
 }
+
+variable "DATABRICKS_HOST" {
+  type        = string
+  description = "A URL do workspace Databricks, fornecida pelo Terraform Cloud."
+}
+
+variable "DATABRICKS_TOKEN" {
+  type        = string
+  description = "O token de API do Databricks, fornecido pelo Terraform Cloud."
+  sensitive   = true # Marca a variável como sensível para não exibi-la nos logs.
+}
