@@ -1,0 +1,41 @@
+name: 'Databricks IaC Deploy'
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  terraform:
+    name: 'Apply Databricks Changes'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 'Checkout Code'
+        uses: actions/checkout@v4
+
+      - name: 'Setup Terraform'
+        uses: hashicorp/setup-terraform@v3
+
+      - name: 'Terraform Init'
+        run: terraform init
+        working-directory: ./terraform
+        # Passamos os secrets para o Terraform como variáveis de ambiente
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        
+      - name: 'Terraform Plan'
+        run: terraform plan -out=tfplan
+        working-directory: ./terraform
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+      - name: 'Terraform Apply'
+        run: terraform apply -auto-approve tfplan
+        working-directory: ./terraform
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
