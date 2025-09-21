@@ -18,14 +18,16 @@ jobs:
       - name: 'Setup Terraform'
         uses: hashicorp/setup-terraform@v3
 
+      # --- PASSO DE INIT CORRIGIDO ---
       - name: 'Terraform Init'
-        run: terraform init
         working-directory: ./terraform
-        # Passamos os secrets para o Terraform como variáveis de ambiente
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-          TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
+        run: |
+          # 1. Cria o arquivo de credenciais com o token que o Terraform precisa para o login.
+          #    Esta é a forma mais garantida de autenticar em automações.
+          echo 'credentials "app.terraform.io" { token = "${{ secrets.TF_API_TOKEN }}" }' > ~/.terraform.d/credentials.tfrc.json
+          
+          # 2. Executa o init, que agora vai encontrar o arquivo de login.
+          terraform init
         
       - name: 'Terraform Plan'
         run: terraform plan -out=tfplan
@@ -33,7 +35,6 @@ jobs:
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-          TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
 
       - name: 'Terraform Apply'
         run: terraform apply -auto-approve tfplan
@@ -41,4 +42,3 @@ jobs:
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-          TF_API_TOKEN: ${{ secrets.TF_API_TOKEN }}
