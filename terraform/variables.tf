@@ -30,8 +30,9 @@ variable "DATABRICKS_TOKEN" {
   sensitive   = true # Marca a variável como sensível para não exibi-la nos logs.
 }
 
+/*
 variable "schema_name" {
   type        = string
   description = "Nome do schema (banco de dados) a ser criado no Hive Metastore."
   default     = "ifood_bronze"
-}
+}*/

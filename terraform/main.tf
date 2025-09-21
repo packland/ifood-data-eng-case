@@ -27,9 +27,10 @@ resource "databricks_cluster" "cluster_analise" {
     }
   }
 }
-
+/*
 resource "databricks_schema" "schema_bronze" {
   catalog_name = "hive_metastore" 
   name    = var.schema_name
   comment = "Schema para os dados brutos do projeto Ifood, criado via IaC."
 }
+*/
