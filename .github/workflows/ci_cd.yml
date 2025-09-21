@@ -18,6 +18,7 @@ jobs:
     
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_CLIENT_ID: ${{ secrets.DATABRICKS_CLIENT_ID }}
       DATABRICKS_HTTP_PATH: ${{ secrets.DATABRICKS_HTTP_PATH }}
       DBT_DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
       # Garante que o dbt não peça feedback
@@ -27,37 +28,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+      - name: Setup Databricks CLI
+        # Action oficial da Databricks para instalar e configurar a CLI 
+        uses: databricks/setup-cli@main
 
-      - name: Install dbt
-        run: pip install dbt-core dbt-databricks
-
-      - name: Create dbt profiles.yml
-        run: |
-          mkdir -p ~/.dbt
-          cat <<EOF > ~/.dbt/profiles.yml
-          dbt_project:
-            target: prd
-            outputs:
-              prd:
-                type: databricks
-                host: ${{ env.DATABRICKS_HOST }}
-                http_path: ${{ env.DATABRICKS_HTTP_PATH }}
-                catalog: ifood_case
-                schema: case
-                threads: 1
-                token: ${{ env.DBT_DATABRICKS_TOKEN }}
-                type: databricks
-          EOF
-
-      - name: Test dbt connection
-        run: dbt debug --project-dir dbt_project --debug
-
-      - name: Run dbt models
-        run: dbt run --project-dir dbt_project --no-version-check
-
-      - name: Run dbt tests
-        run: dbt test --project-dir dbt_project --no-version-check
+      - name: Run a simple command to test authentication
+        # Executamos um comando simples da CLI para listar o conteúdo da raiz do Workspace.
+        # Se este comando funcionar, a autenticação OIDC está 100% correta.
+        run: databricks workspace ls /
