@@ -15,7 +15,7 @@ resource "databricks_job" "job_ingestao_bronze" {
     task_key = "ingestao_bronze"
     notebook_task {
       # Isso continuará funcionando perfeitamente.
-      notebook_path = "${databricks_repo.repo_ifood_case.path_in_workspace}/main_flow.ipynb"
+      notebook_path = "${databricks_repo.repo_ifood_case.path}/main_flow.ipynb"
     }
   }
 
