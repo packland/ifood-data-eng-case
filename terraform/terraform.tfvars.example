@@ -1,0 +1,15 @@
+# terraform/terraform.tfvars.example
+
+# Instruções:
+# 1. Copie este arquivo para 'terraform.tfvars'.
+# 2. Preencha as variáveis obrigatórias abaixo.
+
+# A URL do seu fork do repositório no GitHub (OBRIGATÓRIO).
+# Ex: "https://github.com/seu-usuario/ifood-data-eng-case.git"
+repo_url = "URL_DO_SEU_FORK_AQUI"
+
+# O caminho base para clonar o repositório no Databricks (OPCIONAL).
+# Se esta linha for comentada ou removida, o padrão "/Repos/Shared" será usado.
+# Você pode descomentar e alterar para sua pasta de usuário, se preferir.
+# Ex: repo_base_path = "/Repos/seu-email@provedor.com"
+# repo_base_path = "/Repos/Shared"

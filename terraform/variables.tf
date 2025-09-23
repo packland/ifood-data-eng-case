@@ -30,9 +30,13 @@ variable "DATABRICKS_TOKEN" {
   sensitive   = true # Marca a variável como sensível para não exibi-la nos logs.
 }
 
-/*
-variable "schema_name" {
+variable "repo_url" {
   type        = string
-  description = "Nome do schema (banco de dados) a ser criado no Hive Metastore."
-  default     = "ifood_bronze"
-}*/
+  description = "A URL do repositório Git que será clonado no Databricks Repos."
+}
+
+variable "repo_base_path" {
+  type        = string
+  description = "O caminho base no Databricks Workspace onde o repositório será clonado. O nome do projeto será adicionado ao final deste caminho."
+  default     = "/Repos/Shared"
+}

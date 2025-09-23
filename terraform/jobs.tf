@@ -1,0 +1,27 @@
+# terraform/jobs.tf
+
+resource "databricks_repo" "repo_ifood_case" {
+  url    = var.repo_url
+  branch = "main"
+
+  path_in_workspace = "${var.repo_base_path}/ifood-data-eng-case"
+}
+
+resource "databricks_job" "job_ingestao_bronze" {
+  name                = "1 - [iFood Case] - Ingestão Camada Bronze"
+  existing_cluster_id = databricks_cluster.cluster_analise.id
+
+  task {
+    task_key = "ingestao_bronze"
+    notebook_task {
+      # Isso continuará funcionando perfeitamente.
+      notebook_path = "${databricks_repo.repo_ifood_case.path_in_workspace}/main_flow.ipynb"
+    }
+  }
+
+  tags = {
+    "Projeto"       = "iFood Case IaC",
+    "Camada"        = "Bronze",
+    "GerenciadoPor" = "Terraform"
+  }
+}

@@ -1,3 +1,6 @@
+# Arquivos de variáveis do Terraform
+*.tfvars
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
