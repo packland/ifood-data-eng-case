@@ -1,7 +1,7 @@
 # terraform/jobs.tf
 
 resource "databricks_repo" "repo_ifood_case" {
-  url    = var.REPO_URL
+  url    = var.repo_url
   branch = "main"
 
   path = "${var.repo_base_path}/ifood-data-eng-case"

@@ -19,18 +19,7 @@ variable "spark_version" {
   default     = "14.3.x-scala2.12"
 }
 
-variable "DATABRICKS_HOST" {
-  type        = string
-  description = "A URL do workspace Databricks, fornecida pelo Terraform Cloud."
-}
-
-variable "DATABRICKS_TOKEN" {
-  type        = string
-  description = "O token de API do Databricks, fornecido pelo Terraform Cloud."
-  sensitive   = true # Marca a variável como sensível para não exibi-la nos logs.
-}
-
-variable "REPO_URL" {
+variable "repo_url" {
   type        = string
   description = "A URL do repositório Git que será clonado no Databricks Repos."
 }
