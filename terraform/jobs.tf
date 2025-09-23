@@ -4,7 +4,7 @@ resource "databricks_repo" "repo_ifood_case" {
   url    = var.REPO_URL
   branch = "main"
 
-  path_in_workspace = "${var.repo_base_path}/ifood-data-eng-case"
+  path = "${var.repo_base_path}/ifood-data-eng-case"
 }
 
 resource "databricks_job" "job_ingestao_bronze" {
