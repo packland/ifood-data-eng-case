@@ -33,7 +33,17 @@ jobs:
       - name: 'Terraform Plan'
         run: terraform plan -out=tfplan
         working-directory: ./terraform
+        
+        env:
+          TF_VAR_REPO_URL: ${{ secrets.REPO_URL }}
+          TF_VAR_DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          TF_VAR_DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
       - name: 'Terraform Apply'
         run: terraform apply -auto-approve tfplan
         working-directory: ./terraform
+
+        env:
+          TF_VAR_REPO_URL: ${{ secrets.REPO_URL }}
+          TF_VAR_DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          TF_VAR_DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
