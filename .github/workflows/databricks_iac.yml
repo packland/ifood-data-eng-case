@@ -7,6 +7,36 @@ on:
   workflow_dispatch:
 
 jobs:
+  #==============================================================
+  # JOB TEMPORÁRIO PARA LIMPAR O ESTADO - REMOVA APÓS O SUCESSO
+  #==============================================================
+  fix-state:
+    name: 'TEMPORARY - Clean Terraform State'
+    runs-on: ubuntu-latest
+    
+    # Roda apenas se o workflow for iniciado manualmente
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: 'Checkout Code'
+        uses: actions/checkout@v4
+
+      - name: 'Setup Terraform'
+        uses: hashicorp/setup-terraform@v3
+
+      - name: 'Remove Broken Resources from State'
+        working-directory: ./terraform
+        run: |
+          echo "credentials \"app.terraform.io\" { token = \"${{ secrets.TF_API_TOKEN }}\" }" > ~/.terraformrc
+          terraform init -input=false
+          
+          echo "Removendo recursos antigos do estado..."
+          # Usamos -auto-approve para não precisar de confirmação manual
+          terraform state rm -auto-approve databricks_job.job_ingestao_bronze
+          terraform state rm -auto-approve databricks_cluster.cluster_analise
+          terraform state rm -auto-approve databricks_repo.repo_ifood_case
+          
+          echo "Estado limpo com sucesso!"
   terraform:
     name: 'Apply Databricks Changes'
     runs-on: ubuntu-latest
