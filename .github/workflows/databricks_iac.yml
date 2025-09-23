@@ -13,8 +13,8 @@ jobs:
     
     env:
           TF_VAR_REPO_URL: ${{ secrets.REPO_URL }}
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          TF_VAR_DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          TF_VAR_DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
     
     steps:
       - name: 'Checkout Code'
