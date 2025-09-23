@@ -19,7 +19,7 @@ variable "spark_version" {
   default     = "14.3.x-scala2.12"
 }
 
-variable "repo_url" {
+variable "REPO_URL" {
   type        = string
   description = "A URL do repositório Git que será clonado no Databricks Repos."
 }
