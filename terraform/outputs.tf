@@ -15,7 +15,7 @@ output "cluster_id" {
 
 output "debug_repo_url_recebida" {
   description = "DEBUG: Mostra o valor da variável repo_url que o Terraform está vendo."
-  value       = var.repo_url
+  value       = var.REPO_URL
 }
 
 output "debug_databricks_host_recebido" {
