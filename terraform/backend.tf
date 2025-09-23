@@ -5,7 +5,7 @@ terraform {
     organization = "case-ifood" 
 
     workspaces {
-      name = "databricks-iac-ifood"
+      name = "databricks"
     }
   }
 }
