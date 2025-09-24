@@ -40,18 +40,28 @@ jobs:
       - name: Install Databricks CLI and dbt
         run: |
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-          pip install dbt-core dbt-databricks
+          # pip install dbt-core dbt-databricks
       - name: Run Bronze Layer Job on Databricks
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          echo "Starting Databricks job..."
-          # MUDANÇA: Atualizar o nome do job para corresponder ao Terraform
-          RUN_ID=$(databricks jobs run-now --job-name "iFood Ingestion Job (Serverless)" | jq .run_id)
+          JOB_NAME="iFood Ingestion Job (Serverless)"
+          
+          echo "Finding job ID for '$JOB_NAME'..."
+          JOB_ID=$(databricks jobs list --name "$JOB_NAME" | jq '.jobs[0].job_id')
+          
+          if [ "$JOB_ID" == "null" ] || [ -z "$JOB_ID" ]; then
+            echo "Error: Job '$JOB_NAME' not found."
+            exit 1
+          fi
+          echo "Job found with ID: $JOB_ID"
+
+          echo "Starting Databricks job run..."
+          RUN_ID=$(databricks jobs run-now $JOB_ID | jq .run_id)
           
           if [ -z "$RUN_ID" ]; then
-            echo "Failed to start job."
+            echo "Failed to start job run."
             exit 1
           fi
           echo "Job started with run_id: $RUN_ID"
