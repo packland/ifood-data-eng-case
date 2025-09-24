@@ -40,7 +40,7 @@ jobs:
       - name: Install Databricks CLI and dbt
         run: |
           pip install databricks-cli
-          pip install dbt-core dbt-databricks dbt-utils
+          pip install dbt-core dbt-databricks
       - name: Run Bronze Layer Job on Databricks
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}

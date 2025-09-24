@@ -15,7 +15,7 @@ provider "databricks" {}
 resource "databricks_notebook" "ingestion_notebook" {
   # Confirme se este é o caminho correto no seu projeto
   source = "${path.root}/src/bronze_ingestion/ingestion.ipynb"
-  path   = "/Shared/ifood_case/ingest_bronze.py"
+  path   = "/Shared/ifood_case/ingest_bronze.ipynb"
 }
 
 # Recurso 2: Define o Job Serverless que executará o notebook
@@ -30,8 +30,9 @@ resource "databricks_job" "ingestion_job" {
     notebook_task {
       notebook_path = databricks_notebook.ingestion_notebook.path
     }
+    timeout_seconds = 3600
+    max_retries     = 1
   }
 
-  timeout_seconds = 3600
-  max_retries     = 1
+  
 }
