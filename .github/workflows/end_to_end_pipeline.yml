@@ -11,6 +11,8 @@ on:
 jobs:
   deploy_infrastructure:
     runs-on: ubuntu-latest
+    outputs:
+      databricks_job_id: ${{ steps.tf_output.outputs.job_id }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
