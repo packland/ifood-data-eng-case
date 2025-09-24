@@ -1,0 +1,88 @@
+# Arquivo: .github/workflows/end_to_end_pipeline.yml
+
+name: End-to-End Data Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy_infrastructure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+      - name: Terraform Init
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: terraform init
+      - name: Terraform Apply
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: terraform apply -auto-approve
+
+  run_pipeline:
+    runs-on: ubuntu-latest
+    needs: deploy_infrastructure
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install Databricks CLI and dbt
+        run: |
+          pip install databricks-cli
+          pip install dbt-core dbt-databricks dbt-utils
+      - name: Run Bronze Layer Job on Databricks
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          echo "Starting Databricks job..."
+          # MUDANÇA: Atualizar o nome do job para corresponder ao Terraform
+          RUN_ID=$(databricks jobs run-now --job-name "iFood Ingestion Job (Serverless)" | jq .run_id)
+          
+          if [ -z "$RUN_ID" ]; then
+            echo "Failed to start job."
+            exit 1
+          fi
+          echo "Job started with run_id: $RUN_ID"
+          
+          # Loop de espera (continua o mesmo)
+          while true; do
+            STATUS=$(databricks runs get --run-id $RUN_ID | jq -r .state.life_cycle_state)
+            echo "Current job status: $STATUS"
+            if [[ "$STATUS" == "TERMINATED" || "$STATUS" == "SKIPPED" ]]; then
+              RESULT_STATE=$(databricks runs get --run-id $RUN_ID | jq -r .state.result_state)
+              if [[ "$RESULT_STATE" == "SUCCESS" ]]; then
+                echo "Job completed successfully."
+                break
+              else
+                echo "Job failed with result state: $RESULT_STATE"
+                exit 1
+              fi
+            elif [[ "$STATUS" == "INTERNAL_ERROR" || "$STATUS" == "CANCELED" ]]; then
+              echo "Job failed with life cycle state: $STATUS"
+              exit 1
+            fi
+            sleep 30
+          done
+
+      - name: Run dbt build (Silver and Gold Layers)
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          DBT_CATALOG: "workspace"
+          DBT_SCHEMA: "case_ifood"
+        run: |
+          cd dbt_project
+          dbt deps
+          dbt build
