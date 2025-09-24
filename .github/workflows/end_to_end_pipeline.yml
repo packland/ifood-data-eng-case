@@ -39,7 +39,7 @@ jobs:
           python-version: '3.9'
       - name: Install Databricks CLI and dbt
         run: |
-          pip install databricks-cli
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
           pip install dbt-core dbt-databricks
       - name: Run Bronze Layer Job on Databricks
         env:
