@@ -32,12 +32,6 @@ resource "databricks_job" "ingestion_job" {
     }
   }
 
-  # Controle de acesso para permitir que o job seja executado
-  access_control_list {
-    group_name       = "users"
-    permission_level = "IS_OWNER"
-  }
-
   timeout_seconds = 3600
   max_retries     = 1
 }
