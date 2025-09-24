@@ -31,6 +31,13 @@ clean-targets:         # directories to be removed by `dbt clean`
 # files using the `{{ config(...) }}` macro.
 models:
   ifood_case:
-    # Config indicated by + and applies to all files under models/example/
-    example:
-      +materialized: view
+    +file_format: delta
+    +contract: {enforced: true}
+    +on_schema_change: fail
+    
+    silver:
+      +materialized: table
+
+    gold:
+      +materialized: table
+      

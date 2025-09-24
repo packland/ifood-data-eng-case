@@ -1,6 +1,13 @@
 # Arquivos de variáveis do Terraform
 *.tfvars
 
+# Arquivos do dbt
+.user*
+dbt_packages
+
+# Makefile
+Makefile
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

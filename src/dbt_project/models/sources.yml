@@ -1,0 +1,69 @@
+version: 2
+
+sources:
+  - name: case_ifood # Nome do grupo de fontes (pode ser o nome do projeto)
+    database: workspace # O nome do seu banco de dados/catálogo no Databricks
+    schema: case_ifood # O schema onde a tabela está localizada
+    tables:
+      - name: bronze # O nome exato da sua tabela na camada bronze
+        description: "Tabela de dados brutos contendo os registros de viagens dos táxis amarelos de NY. Os dados são ingeridos via PySpark e servem como fonte para a camada Silver."
+        columns:
+          - name: vendorid
+            description: "Um código que indica o provedor de TPEP que forneceu o registro. 1=Creative Mobile Technologies, LLC; 2=Curb Mobility, LLC; etc. [cite: 6]"
+
+          - name: tpep_pickup_datetime
+            description: "A data e a hora em que o taxímetro foi acionado (início da corrida). [cite: 6]"
+
+          - name: tpep_dropoff_datetime
+            description: "A data e a hora em que o taxímetro foi desativado (fim da corrida). [cite: 6]"
+
+          - name: passenger_count
+            description: "O número de passageiros no veículo. [cite: 6]"
+
+          - name: trip_distance
+            description: "A distância da viagem em milhas, reportada pelo taxímetro. [cite: 6]"
+
+          - name: ratecodeid
+            description: "O código da tarifa final em vigor no final da viagem. 1=Tarifa padrão, 2=JFK, 3=Newark, etc. [cite: 6]"
+
+          - name: store_and_fwd_flag
+            description: "Indica se o registro da viagem foi mantido na memória do veículo antes de ser enviado ao fornecedor (armazenar e encaminhar). Y=Sim, N=Não. [cite: 6]"
+
+          - name: pulocationid
+            description: "ID da Zona de Táxi da TLC (Taxi & Limousine Commission) onde o taxímetro foi acionado. [cite: 6]"
+
+          - name: dolocationid
+            description: "ID da Zona de Táxi da TLC onde o taxímetro foi desativado. [cite: 6]"
+
+          - name: payment_type
+            description: "Código numérico que significa como o passageiro pagou pela viagem. 1=Cartão de crédito, 2=Dinheiro, etc. [cite: 6]"
+
+          - name: fare_amount
+            description: "A tarifa de tempo e distância calculada pelo taxímetro. [cite: 6]"
+
+          - name: extra
+            description: "Extras e sobretaxas diversas. [cite: 6]"
+
+          - name: mta_tax
+            description: "Imposto que é acionado automaticamente com base na tarifa taxada em uso. [cite: 6]"
+
+          - name: tip_amount
+            description: "Valor da gorjeta. Este campo é preenchido automaticamente para gorjetas de cartão de crédito. Gorjetas em dinheiro não estão incluídas. [cite: 6]"
+
+          - name: tolls_amount
+            description: "Valor total de todos os pedágios pagos na viagem. [cite: 6]"
+
+          - name: improvement_surcharge
+            description: "Sobretaxa de melhoria avaliada nas viagens na 'bandeirada' (flag drop), cobrada desde 2015. [cite: 6]"
+
+          - name: total_amount
+            description: "O valor total cobrado dos passageiros. Não inclui gorjetas em dinheiro. [cite: 6]"
+
+          - name: congestion_surcharge
+            description: "Valor total coletado na viagem para a sobretaxa de congestionamento do estado de NY. [cite: 6]"
+
+          - name: airport_fee
+            description: "Taxa para embarques apenas nos aeroportos LaGuardia e John F. Kennedy. [cite: 6]"
+
+          - name: cbd_congestion_fee
+            description: "Taxa por viagem para a Zona de Alívio de Congestionamento da MTA. [cite: 6]"

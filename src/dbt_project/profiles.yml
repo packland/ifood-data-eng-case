@@ -1,0 +1,11 @@
+dbt_project:
+  outputs:
+    prd:
+      catalog: "{{ env_var('DBT_CATALOG') }}"
+      host: "{{ env_var('DATABRICKS_HOST') }}"
+      http_path: "{{ env_var('DATABRICKS_HTTP_PATH') }}"
+      schema: "{{ env_var('DBT_SCHEMA', 'default') }}"
+      token: "{{ env_var('DATABRICKS_TOKEN') }}"
+      threads: 1
+      type: databricks
+  target: prd
