@@ -73,10 +73,10 @@ jobs:
           
           # Loop de espera (continua o mesmo)
           while true; do
-            STATUS=$(databricks runs get --run-id $RUN_ID | jq -r .state.life_cycle_state)
+            STATUS=$(databricks jobs get-run --run-id $RUN_ID | jq -r .state.life_cycle_state)
             echo "Current job status: $STATUS"
             if [[ "$STATUS" == "TERMINATED" || "$STATUS" == "SKIPPED" ]]; then
-              RESULT_STATE=$(databricks runs get --run-id $RUN_ID | jq -r .state.result_state)
+              RESULT_STATE=$(databricks jobs get-run --run-id $RUN_ID | jq -r .state.result_state)
               if [[ "$RESULT_STATE" == "SUCCESS" ]]; then
                 echo "Job completed successfully."
                 break
@@ -88,7 +88,7 @@ jobs:
               echo "Job failed with life cycle state: $STATUS"
               exit 1
             fi
-            sleep 30
+            sleep 10
           done
 
       - name: Run dbt build (Silver and Gold Layers)
