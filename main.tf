@@ -1,5 +1,12 @@
 # Bloco de configuração do Terraform e do provedor
 terraform {
+  backend "remote" {
+    organization = "case-ifood" 
+
+    workspaces {
+      name = "databricks-jobs"
+    }
+  }
   required_providers {
     databricks = {
       source  = "databricks/databricks"
@@ -35,4 +42,9 @@ resource "databricks_job" "ingestion_job" {
   }
 
   
+}
+
+output "databricks_job_id" {
+  description = "The numeric ID of the iFood Ingestion Job."
+  value       = databricks_job.ingestion_job.id
 }
