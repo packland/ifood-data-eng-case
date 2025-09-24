@@ -14,7 +14,7 @@ provider "databricks" {}
 # Recurso 1: Define o Notebook a ser implantado no Databricks
 resource "databricks_notebook" "ingestion_notebook" {
   # Confirme se este é o caminho correto no seu projeto
-  source = "${path.root}/src/ingestion/ingest_bronze.py"
+  source = "${path.root}/src/bronze_ingestion/ingestion.ipynb"
   path   = "/Shared/ifood_case/ingest_bronze.py"
 }
 
