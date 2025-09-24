@@ -1,0 +1,184 @@
+models:
+  #========= 1. Tabela OBT Detalhada =========
+  - name: gold_obt_taxi_trips
+    description: "Tabela OBT (One Big Table) denormalizada, contendo todos os detalhes de cada viagem de táxi. Os IDs foram enriquecidos com suas descrições para facilitar a análise exploratória."
+    columns:
+      - name: trip_id
+        data_type: string
+        description: "Chave primária única para cada viagem."
+        tests:
+          - unique
+          - not_null
+
+      - name: vendor_id
+        data_type: int
+        description: "ID numérico do provedor da tecnologia do táxi."
+        tests:
+          - not_null
+
+      - name: passenger_count
+        data_type: int
+        description: "Número de passageiros na viagem."
+        tests:
+          - not_null
+
+      - name: trip_distance
+        data_type: double
+        description: "Distância da viagem em milhas."
+        tests:
+          - not_null
+
+      - name: total_amount
+        data_type: double
+        description: "Valor total cobrado dos passageiros."
+        tests:
+          - not_null
+
+      - name: tpep_pickup_datetime
+        data_type: timestamp
+        description: "Data e hora exatas do início da corrida."
+        tests:
+          - not_null
+
+      - name: tpep_dropoff_datetime
+        data_type: timestamp
+        description: "Data e hora exatas do fim da corrida."
+        tests:
+          - not_null
+
+      - name: pickup_date
+        data_type: date
+        description: "Data de início da corrida, para facilitar filtros e agregações."
+        tests:
+          - not_null
+
+      - name: pickup_hour
+        data_type: int
+        description: "Hora de início da corrida (0-23), para análises de padrões horários."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+
+      - name: vendor_name
+        data_type: string
+        description: "Nome descritivo do provedor, denormalizado a partir do vendor_id."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Creative Mobile Technologies, LLC', 'Curb Mobility, LLC', 'Myle Technologies Inc', 'Helix', 'Id not mapped']
+
+
+  #========= 2. Tabela Agregada Mensal =========
+  - name: gold_monthly_metrics
+    description: "Tabela agregada com as principais métricas de negócio, sumarizadas por mês. Ideal para dashboards gerenciais e análises de tendência."
+    columns:
+      - name: mes_ano
+        data_type: date
+        description: "Primeiro dia do mês da agregação. Chave primária da tabela."
+        tests:
+          - unique
+          - not_null
+
+      - name: quant_corridas
+        data_type: bigint
+        description: "Número total de corridas no mês."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+      - name: media_valor_total
+        data_type: double
+        description: "Média do valor total das corridas no mês."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+      - name: total_valor_arrecadado
+        data_type: double
+        description: "Soma de todo o valor arrecadado no mês."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+        
+      - name: total_passageiros
+        data_type: bigint
+        description: "Número total de passageiros transportados no mês."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+      - name: media_passageiros_por_corrida
+        data_type: double
+        description: "Média de passageiros por corrida no mês."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+        
+      - name: total_km_percorrida
+        data_type: double
+        description: "Soma de todas as distâncias percorridas (em milhas) no mês."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+      - name: media_km_por_corrida
+        data_type: double
+        description: "Distância média por corrida no mês."
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+  #========= 3. Tabela Agregada Horária =========
+  - name: gold_hourly_metrics
+    description: "Tabela agregada com métricas por hora do dia, para cada mês. Usada para entender padrões de demanda e comportamento ao longo do dia."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - mes_ano
+            - hora_do_dia
+    columns:
+      - name: mes_ano
+        data_type: date
+        description: "Primeiro dia do mês da agregação."
+        tests:
+          - not_null
+      
+      - name: hora_do_dia
+        data_type: integer
+        description: "A hora do dia (0-23) da agregação."
+        tests:
+          - not_null
+          - accepted_values:
+              values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+
+      - name: media_passageiros
+        data_type: double
+        description: "Média de passageiros para a hora específica dentro do mês."
+        tests:
+          - not_null
+
+      - name: quant_corridas
+        data_type: bigint
+        description: "Número total de corridas para a hora específica dentro do mês."
+        tests:
+          - not_null
+          
+      - name: media_valor_total
+        data_type: double
+        description: "Média do valor total das corridas para a hora específica dentro do mês."
+        tests:
+          - not_null
+          
+      - name: media_km_percorrida
+        data_type: double
+        description: "Média da distância percorrida para a hora específica dentro do mês."
+        tests:
+          - not_null

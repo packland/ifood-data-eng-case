@@ -1,13 +1,5 @@
 -- dbt_project/models/silver/silver.sql
 
-{{
-    config(
-        materialized='incremental',
-        unique_key='trip_id'
-    )
-}}
-
--- CTE 1: Seleciona, renomeia e faz o casting das colunas da camada Bronze.
 WITH source_data AS (
     SELECT
         -- IDs e Chaves (com dupla conversão)
@@ -38,9 +30,7 @@ WITH source_data AS (
         CAST(airport_fee AS DOUBLE) AS airport_fee
 
     FROM {{ source('case_ifood', 'bronze') }}
-    {% if is_incremental() %}
-    -- Lógica incremental futura
-    {% endif %}
+    WHERE tpep_pickup_datetime >= '2023-01-01' AND tpep_pickup_datetime < '2023-06-01'
 ),
 
 -- CTE 2: Gera a chave primária robusta e aplica filtros de qualidade.
