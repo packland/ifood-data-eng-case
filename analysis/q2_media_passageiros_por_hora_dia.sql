@@ -3,6 +3,7 @@
 -- Para executar, copie e cole este código no SQL Editor do Databricks.
 
 SELECT
+    mes_ano,
     hora_do_dia,
     media_passageiros
 FROM
