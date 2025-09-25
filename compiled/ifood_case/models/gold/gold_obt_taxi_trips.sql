@@ -1,3 +1,5 @@
+
+
 with silver_trips as (
     select * from `workspace`.`case_ifood`.`silver`
 ),
