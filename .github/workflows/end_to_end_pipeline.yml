@@ -95,17 +95,6 @@ jobs:
             fi
             sleep 30
           done
-
-      - name: Run dbt build (Silver and Gold Layers)
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
-          DBT_CATALOG: "workspace"
-          DBT_SCHEMA: "case_ifood"
-        run: |
-          cd dbt_project
-          dbt deps
-          dbt build
   
   run_pipeline_dbt:
     runs-on: ubuntu-latest
@@ -118,8 +107,7 @@ jobs:
         with:
           python-version: '3.9'
       - name: Install dbt packages
-        run: pip install dbt-core dbt-databricks dbt-utils
-        
+        run: pip install dbt-core dbt-databricks
       - name: Run dbt build (Silver and Gold Layers)
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
@@ -127,6 +115,6 @@ jobs:
           DBT_CATALOG: "workspace"
           DBT_SCHEMA: "case_ifood"
         run: |
-          cd dbt_project
-          dbt deps
-          dbt build
+          # Executa os comandos dbt especificando o diretório do projeto,
+          dbt deps --project-dir src/dbt_project
+          dbt build --project-dir src/dbt_project --profiles-dir src/dbt_project
