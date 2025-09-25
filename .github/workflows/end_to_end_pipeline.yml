@@ -38,7 +38,7 @@ jobs:
         run: echo "job_id=$(terraform output -raw databricks_job_id)" >> $GITHUB_OUTPUT
 
 
-  run_pipeline:
+  run_pipeline_bronze:
     runs-on: ubuntu-latest
     needs: deploy_infrastructure
     steps:
@@ -49,10 +49,9 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-      - name: Install Databricks CLI and dbt
+      - name: Install Databricks CLI
         run: |
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
-          # pip install dbt-core dbt-databricks
       - name: Run Bronze Layer Job on Databricks
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
@@ -73,7 +72,7 @@ jobs:
           
           # Loop de espera (continua o mesmo)
           while true; do
-            STATUS=$(databricks jobs get-run --run-id $RUN_ID | jq -r .state.life_cycle_state)
+            STATUS=$(databricks jobs get-run $RUN_ID | jq -r .state.life_cycle_state)
             echo "Current job status: $STATUS"
             if [[ "$STATUS" == "TERMINATED" || "$STATUS" == "SKIPPED" ]]; then
               RESULT_STATE=$(databricks jobs get-run --run-id $RUN_ID | jq -r .state.result_state)
@@ -91,6 +90,30 @@ jobs:
             sleep 10
           done
 
+      - name: Run dbt build (Silver and Gold Layers)
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          DBT_CATALOG: "workspace"
+          DBT_SCHEMA: "case_ifood"
+        run: |
+          cd dbt_project
+          dbt deps
+          dbt build
+  
+run_pipeline_dbt:
+    runs-on: ubuntu-latest
+    needs: run_pipeline_bronze
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dbt packages
+        run: pip install dbt-core dbt-databricks dbt-utils
+        
       - name: Run dbt build (Silver and Gold Layers)
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
