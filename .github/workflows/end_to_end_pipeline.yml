@@ -122,8 +122,8 @@ jobs:
 
   deploy_dbt_docs:
     runs-on: ubuntu-latest
-    needs: run_pipeline_dbt # Roda apenas após o sucesso do dbt build
-    # Condição para rodar apenas em merges/pushes na branch 'main'
+    # needs: run_pipeline_dbt # Roda apenas após o sucesso do dbt build
+    # # Condição para rodar apenas em merges/pushes na branch 'main'
     if: github.ref == 'refs/heads/main'
     
     permissions:
