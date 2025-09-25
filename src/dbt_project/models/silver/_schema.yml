@@ -20,6 +20,12 @@ models:
               arguments:
                 values: [1, 2, 6, 7]
 
+      - name: pickup_date 
+        data_type: date
+        description: "Data do início da corrida. Coluna para particionamento"
+        tests:
+          - not_null
+
       - name: tpep_pickup_datetime
         data_type: timestamp
         description: "Data e hora do início da corrida. "
