@@ -101,7 +101,7 @@ jobs:
           dbt deps
           dbt build
   
-run_pipeline_dbt:
+  run_pipeline_dbt:
     runs-on: ubuntu-latest
     needs: run_pipeline_bronze
     steps:
