@@ -55,14 +55,17 @@ graph LR
     C -- Transform --> F
     E --> G
     F --> G
-    subgraph "dbt"
-      C;D;E;F;
-    end
 ```
 
 - **Bronze:** A ingestão dos dados brutos é feita por um notebook PySpark, orquestrado por um Job no Databricks. Os dados são armazenados como Delta Tables sem transformações complexas.
 - **Silver:** O dbt assume a responsabilidade, aplicando limpezas, conversão de tipos e testes de qualidade para criar uma tabela confiável e auditável.
 - **Gold:** O dbt cria *data marts* agregados e denormalizados, prontos para responder diretamente às perguntas de negócio com máxima performance.
+
+### Otimizações de Performance (Particionamento)
+
+Para garantir a performance e a escalabilidade das consultas, especialmente na camada Silver que contém um grande volume de dados, uma otimização chave foi implementada:
+
+-   **Particionamento Físico:** A tabela `silver` foi fisicamente particionada pela coluna `pickup_date`. Isso significa que os dados são armazenados em subdiretórios organizados por data no Delta Lake. Quando uma consulta filtra por um período específico (ex: um mês ou uma semana), o Databricks ignora todos os outros diretórios, lendo uma quantidade drasticamente menor de dados e acelerando as transformações e análises subsequentes. Esta otimização foi aplicada diretamente no modelo dbt através da configuração `partition_by`.
 
 ## ✨ Foco em Qualidade e Governança
 
