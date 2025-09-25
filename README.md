@@ -121,7 +121,7 @@ A forma mais simples de executar o projeto é através do workflow de CI/CD:
 
 ## 📈 Respostas para as Perguntas do Case
 
-As queries finais que respondem às perguntas do desafio estão na pasta `analysis/`. Elas consultam diretamente as tabelas da camada Gold, demonstrando a simplicidade do consumo dos dados após o trabalho de engenharia.
+As querys finais que respondem às perguntas do desafio estão na pasta `analysis/`. Elas consultam diretamente as tabelas da camada Gold, demonstrando a simplicidade do consumo dos dados após o trabalho de engenharia.
 
 #### 1. Qual a média de valor total (`total_amount`) recebido em um mês?
 *Arquivo: [`analysis/q1_media_valor_total_por_mes.sql`](./analysis/q1_media_valor_total_por_mes.sql)*

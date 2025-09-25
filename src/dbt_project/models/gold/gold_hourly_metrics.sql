@@ -1,13 +1,13 @@
-SELECT
-    -- Chaves da granularidade
-    CAST(DATE_TRUNC('MONTH', tpep_pickup_datetime) AS DATE) AS mes_ano,
-    EXTRACT(HOUR FROM tpep_pickup_datetime) AS hora_do_dia,
+select
+    -- chaves da granularidade
+    cast(date_trunc('month', tpep_pickup_datetime) as date) as mes_ano,
+    extract(hour from tpep_pickup_datetime) as hora_do_dia,
     
-    AVG(passenger_count) AS media_passageiros, -- Responde ao case
-    COUNT(trip_id) AS quant_corridas,
-    AVG(total_amount) AS media_valor_total,
-    AVG(trip_distance) AS media_km_percorrida
+    avg(passenger_count) as media_passageiros, -- responde ao case
+    count(trip_id) as quant_corridas,
+    avg(total_amount) as media_valor_total,
+    avg(trip_distance) as media_km_percorrida
 
-FROM {{ ref('silver') }}
-GROUP BY
+from {{ ref('silver') }}
+group by
     1, 2

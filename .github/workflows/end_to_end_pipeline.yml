@@ -73,9 +73,7 @@ jobs:
           fi
           echo "Job started with run_id: $RUN_ID"
           
-          # --- CORREÇÃO FINAL AQUI ---
           while true; do
-            # CORREÇÃO: Usar o RUN_ID como argumento posicional, sem a flag --run-id
             STATUS_JSON=$(databricks jobs get-run $RUN_ID)
             STATUS=$(echo $STATUS_JSON | jq -r .state.life_cycle_state)
             echo "Current job status: $STATUS"
@@ -123,7 +121,6 @@ jobs:
   deploy_dbt_docs:
     runs-on: ubuntu-latest
     needs: run_pipeline_dbt # Roda apenas após o sucesso do dbt build
-    # Condição para rodar apenas em merges/pushes na branch 'main'
     if: github.ref == 'refs/heads/main'
     
     permissions:

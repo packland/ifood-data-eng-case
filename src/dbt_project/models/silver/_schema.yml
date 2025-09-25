@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: silver # O nome do seu modelo .sql
+  - name: silver # O nome do modelo .sql
     description: "Tabela de corridas de táxi limpa, tipada e validada. Esta tabela serve como a fonte única da verdade para todas as análises de negócio. Dados inválidos ou inconsistentes da camada bronze foram removidos ou corrigidos."
     columns:
       - name: trip_id # Adicionamos uma chave primária
