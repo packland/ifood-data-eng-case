@@ -1,5 +1,7 @@
 -- dbt_project/models/silver/silver.sql
 
+
+
 with source_data as (
     select
         -- ids e chaves (com dupla conversão)
@@ -10,6 +12,7 @@ with source_data as (
         cast(cast(payment_type as double) as integer) as payment_type,
 
         -- timestamps
+        cast(tpep_pickup_datetime as date) AS pickup_date, -- coluna para particionamento
         cast(tpep_pickup_datetime as timestamp) as tpep_pickup_datetime,
         cast(tpep_dropoff_datetime as timestamp) as tpep_dropoff_datetime,
 
