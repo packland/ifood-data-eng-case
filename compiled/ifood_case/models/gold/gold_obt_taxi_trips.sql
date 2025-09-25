@@ -1,35 +1,35 @@
-WITH silver_trips AS (
-    SELECT * FROM `workspace`.`case_ifood`.`silver`
+with silver_trips as (
+    select * from `workspace`.`case_ifood`.`silver`
 ),
 
-final AS (
-    SELECT
-        -- Chaves e IDs
+final as (
+    select
+        -- chaves e ids
         trip_id, 
         vendor_id,
 
-        -- Métricas
+        -- métricas
         passenger_count,
         trip_distance,
         total_amount,
 
-        -- Timestamps
+        -- timestamps
         tpep_pickup_datetime,
         tpep_dropoff_datetime,
-        -- Extraindo data e hora para facilitar filtros
-        CAST(tpep_pickup_datetime AS DATE) AS pickup_date,
-        EXTRACT(HOUR FROM tpep_pickup_datetime) AS pickup_hour,
+        -- extraindo data e hora para facilitar filtros
+        cast(tpep_pickup_datetime as date) as pickup_date,
+        extract(hour from tpep_pickup_datetime) as pickup_hour,
 
-        -- Campos Descritivos (Enriquecimento via CASE)
-        CASE 
-            WHEN vendor_id = 1 THEN 'Creative Mobile Technologies, LLC'
-            WHEN vendor_id = 2 THEN 'Curb Mobility, LLC'
-            WHEN vendor_id = 6 THEN 'Myle Technologies Inc'
-            WHEN vendor_id = 7 THEN 'Helix'
-            ELSE 'Id not mapped'
-        END AS vendor_name
+        -- campos descritivos (enriquecimento via case)
+        case 
+            when vendor_id = 1 then 'Creative Mobile Technologies, LLC'
+            when vendor_id = 2 then 'Curb Mobility, LLC'
+            when vendor_id = 6 then 'Myle Technologies Inc'
+            when vendor_id = 7 then 'Helix'
+            else 'Id not mapped'
+        end as vendor_name
         
-    FROM silver_trips
+    from silver_trips
 )
 
-SELECT * FROM final
+select * from final

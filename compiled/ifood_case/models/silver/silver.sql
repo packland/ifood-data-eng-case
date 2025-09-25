@@ -1,50 +1,50 @@
 -- dbt_project/models/silver/silver.sql
 
-WITH source_data AS (
-    SELECT
-        -- IDs e Chaves (com dupla conversão)
-        CAST(CAST(vendorid AS DOUBLE) AS INTEGER) AS vendor_id,
-        CAST(CAST(ratecodeid AS DOUBLE) AS INTEGER) AS rate_code_id,
-        CAST(CAST(pulocationid AS DOUBLE) AS INTEGER) AS pu_location_id,
-        CAST(CAST(dolocationid AS DOUBLE) AS INTEGER) AS do_location_id,
-        CAST(CAST(payment_type AS DOUBLE) AS INTEGER) AS payment_type,
+with source_data as (
+    select
+        -- ids e chaves (com dupla conversão)
+        cast(cast(vendorid as double) as integer) as vendor_id,
+        cast(cast(ratecodeid as double) as integer) as rate_code_id,
+        cast(cast(pulocationid as double) as integer) as pu_location_id,
+        cast(cast(dolocationid as double) as integer) as do_location_id,
+        cast(cast(payment_type as double) as integer) as payment_type,
 
-        -- Timestamps
-        CAST(tpep_pickup_datetime AS TIMESTAMP) AS tpep_pickup_datetime,
-        CAST(tpep_dropoff_datetime AS TIMESTAMP) AS tpep_dropoff_datetime,
+        -- timestamps
+        cast(tpep_pickup_datetime as timestamp) as tpep_pickup_datetime,
+        cast(tpep_dropoff_datetime as timestamp) as tpep_dropoff_datetime,
 
-        -- Métricas da Viagem (com dupla conversão)
-        CAST(CAST(passenger_count AS DOUBLE) AS INTEGER) AS passenger_count,
-        CAST(trip_distance AS DOUBLE) AS trip_distance,
+        -- métricas da viagem (com dupla conversão)
+        cast(cast(passenger_count as double) as integer) as passenger_count,
+        cast(trip_distance as double) as trip_distance,
         store_and_fwd_flag,
 
-        -- Valores Monetários
-        CAST(fare_amount AS DOUBLE) AS fare_amount,
-        CAST(extra AS DOUBLE) AS extra,
-        CAST(mta_tax AS DOUBLE) AS mta_tax,
-        CAST(tip_amount AS DOUBLE) AS tip_amount,
-        CAST(tolls_amount AS DOUBLE) AS tolls_amount,
-        CAST(improvement_surcharge AS DOUBLE) AS improvement_surcharge,
-        CAST(total_amount AS DOUBLE) AS total_amount,
-        CAST(congestion_surcharge AS DOUBLE) AS congestion_surcharge,
-        CAST(airport_fee AS DOUBLE) AS airport_fee
+        -- valores monetários
+        cast(fare_amount as double) as fare_amount,
+        cast(extra as double) as extra,
+        cast(mta_tax as double) as mta_tax,
+        cast(tip_amount as double) as tip_amount,
+        cast(tolls_amount as double) as tolls_amount,
+        cast(improvement_surcharge as double) as improvement_surcharge,
+        cast(total_amount as double) as total_amount,
+        cast(congestion_surcharge as double) as congestion_surcharge,
+        cast(airport_fee as double) as airport_fee
 
-    FROM `workspace`.`case_ifood`.`bronze`
-    WHERE tpep_pickup_datetime >= '2023-01-01' AND tpep_pickup_datetime < '2023-06-01'
+    from `workspace`.`case_ifood`.`bronze`
+    where tpep_pickup_datetime >= '2023-01-01' and tpep_pickup_datetime < '2023-06-01'
 ),
 
--- CTE 2: Gera a chave primária robusta e aplica filtros de qualidade.
-final AS (
-    SELECT
-        -- Geração da chave primária surrogate com mais colunas para garantir unicidade
-        md5(cast(concat(coalesce(cast(vendor_id as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(tpep_pickup_datetime as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(tpep_dropoff_datetime as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(pu_location_id as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(do_location_id as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(total_amount as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(passenger_count as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(trip_distance as string), '_dbt_utils_surrogate_key_null_')) as string)) AS trip_id,
+-- cte 2: gera a chave primária robusta e aplica filtros de qualidade.
+final as (
+    select
+        -- geração da chave primária surrogate com mais colunas para garantir unicidade
+        md5(cast(concat(coalesce(cast(vendor_id as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(tpep_pickup_datetime as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(tpep_dropoff_datetime as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(pu_location_id as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(do_location_id as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(total_amount as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(passenger_count as string), '_dbt_utils_surrogate_key_null_'), '-', coalesce(cast(trip_distance as string), '_dbt_utils_surrogate_key_null_')) as string)) as trip_id,
         *
-    FROM source_data
-    WHERE
+    from source_data
+    where
         total_amount >= 0
-        AND fare_amount >= 0
-        AND tpep_dropoff_datetime > tpep_pickup_datetime
-        AND passenger_count > 0
+        and fare_amount >= 0
+        and tpep_dropoff_datetime > tpep_pickup_datetime
+        and passenger_count > 0
 )
 
-SELECT * FROM final
+select * from final
