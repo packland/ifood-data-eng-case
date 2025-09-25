@@ -59,9 +59,12 @@ jobs:
           JOB_ID_FROM_TF: ${{ needs.deploy_infrastructure.outputs.databricks_job_id }}
         run: |
           echo "Job ID received from Terraform: $JOB_ID_FROM_TF"
-
+          if [ -z "$JOB_ID_FROM_TF" ]; then
+            echo "Error: Job ID from Terraform is empty."
+            exit 1
+          fi
+          
           echo "Starting Databricks job run..."
-          # MUDANÇA: Usa o ID diretamente, sem precisar procurar pelo nome
           RUN_ID=$(databricks jobs run-now $JOB_ID_FROM_TF | jq .run_id)
           
           if [ -z "$RUN_ID" ]; then
@@ -70,12 +73,15 @@ jobs:
           fi
           echo "Job started with run_id: $RUN_ID"
           
-          # Loop de espera (continua o mesmo)
+          # --- CORREÇÃO FINAL AQUI ---
           while true; do
-            STATUS=$(databricks jobs get-run $RUN_ID | jq -r .state.life_cycle_state)
+            # CORREÇÃO: Usar o RUN_ID como argumento posicional, sem a flag --run-id
+            STATUS_JSON=$(databricks jobs get-run $RUN_ID)
+            STATUS=$(echo $STATUS_JSON | jq -r .state.life_cycle_state)
             echo "Current job status: $STATUS"
+            
             if [[ "$STATUS" == "TERMINATED" || "$STATUS" == "SKIPPED" ]]; then
-              RESULT_STATE=$(databricks jobs get-run --run-id $RUN_ID | jq -r .state.result_state)
+              RESULT_STATE=$(echo $STATUS_JSON | jq -r .state.result_state)
               if [[ "$RESULT_STATE" == "SUCCESS" ]]; then
                 echo "Job completed successfully."
                 break
@@ -87,7 +93,7 @@ jobs:
               echo "Job failed with life cycle state: $STATUS"
               exit 1
             fi
-            sleep 10
+            sleep 30
           done
 
       - name: Run dbt build (Silver and Gold Layers)
