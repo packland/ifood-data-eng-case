@@ -65,7 +65,7 @@ graph LR
 
 Para garantir a performance e a escalabilidade das consultas, especialmente na camada Silver que contém um grande volume de dados, uma otimização chave foi implementada:
 
--   **Particionamento Físico:** A tabela `silver` foi fisicamente particionada pela coluna `pickup_date`. Isso significa que os dados são armazenados em subdiretórios organizados por data no Delta Lake. Quando uma consulta filtra por um período específico (ex: um mês ou uma semana), o Databricks ignora todos os outros diretórios, lendo uma quantidade drasticamente menor de dados e acelerando as transformações e análises subsequentes. Esta otimização foi aplicada diretamente no modelo dbt através da configuração `partition_by`.
+-   **Particionamento Físico:** As tabelas `silver` e `gold_obt_taxi_trips` foram fisicamente particionadas pela coluna `pickup_date`. Isso significa que os dados são armazenados em subdiretórios organizados por data no Delta Lake. Quando uma consulta filtra por um período específico (ex: um mês ou uma semana), o Databricks ignora todos os outros diretórios, lendo uma quantidade drasticamente menor de dados e acelerando as transformações e análises subsequentes. Esta otimização foi aplicada diretamente no modelo dbt através da configuração `partition_by`.
 
 ## ✨ Foco em Qualidade e Governança
 

@@ -1,3 +1,9 @@
+{{
+    config(
+        partition_by=['pickup_date']
+    )
+}}
+
 with silver_trips as (
     select * from {{ ref('silver') }}
 ),
